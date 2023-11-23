@@ -1,8 +1,10 @@
 const grid = document.getElementsByClassName("grid")[0];
-const linearButton = document.getElementById("linear-search");
+// const linearButton = document.getElementById("linear-search");
 const bfsButton = document.getElementById("bfs-search");
 const dfsButton = document.getElementById("dfs-search");
+const resetButton = document.getElementById("reset-search");
 let interval;
+let isHeld = false;
 let mouse = {x: 0, y: 0};
 const gridHeight = 20;
 const gridWidth = 20;
@@ -21,15 +23,15 @@ for(let i = 0; i < gridHeight; i++) {
     }
 }
 
-for(let i = 0; i < 250; i++) {
-    const row = Math.floor(Math.random() * gridHeight);
-    const col = Math.floor(Math.random() * gridWidth);
-    if (row !== 0 && col !== 0) {
-        const wallNode = document.getElementById(`${row}-${col}`);
-        wallNode.classList.add('wall');
-        gridArr[row][col] = 1;
-    }
-}
+// for(let i = 0; i < 225; i++) {
+//     const row = Math.floor(Math.random() * gridHeight);
+//     const col = Math.floor(Math.random() * gridWidth);
+//     if (row !== 0 && col !== 0) {
+//         const wallNode = document.getElementById(`${row}-${col}`);
+//         wallNode.classList.add('wall');
+//         gridArr[row][col] = 1;
+//     }
+// }
 
 gridArr[0][0] = 2;
 const startNode = document.getElementsByClassName("grid-square")[0];
@@ -161,55 +163,53 @@ async function dfs() {
     }
 }
 
+function reset() {
+    for(let i = 0; i < gridArr.length; i++) {
+        for(let j = 0; j < gridArr[i].length; j++) {
+            document.getElementById(`${i}-${j}`).classList.remove('color');
+        }
+    }
+}
+
 grid.addEventListener('click', handleGridClick);
-linearButton.addEventListener('click', linear);
+// linearButton.addEventListener('click', linear);
 bfsButton.addEventListener('click', bfs);
 dfsButton.addEventListener('click', dfs);
+resetButton.addEventListener('click', reset);
 
+function elementFromMousePosition() {
+    let element = document.elementFromPoint(mouse.x, mouse.y);
+    console.log(element.className);
+    if (element.className === 'grid-square' || element.className === 'grid-square wall') {
+        // console.log('Clicked Square');
+        element.classList.add('wall');
+        const coord = element.id.split('-');
+        const row = Number(coord[0]);
+        const col = Number(coord[1]);
+        gridArr[row][col] = 1;
+    }
+}
 
+grid.addEventListener('mousemove', event => {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+});
 
+grid.addEventListener('mousedown', event => {
+    isHeld = true;
+    interval = setInterval(() => {
+        if (isHeld) {
+            elementFromMousePosition();
+        }
+    }, 100);
+});
 
+grid.addEventListener('mouseup', event => {
+    isHeld = false;
+    clearInterval(interval);
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function elementFromMousePosition() {
-//     let element = document.elementFromPoint(mouse.x, mouse.y);
-//     if (element.className === 'grid-square' || element.className === 'grid-square color') {
-//         console.log('Clicked Square');
-//         element.classList.toggle('color');
-//     }
-// }
-
-// grid.addEventListener('mousemove', event => {
-//     mouse.x = event.clientX;
-//     mouse.y = event.clientY;
-// });
-
-// grid.addEventListener('mousedown', event => {
-//     interval = setInterval(elementFromMousePosition, 100);
-// });
-
-// grid.addEventListener('mouseup', event => {
-//     clearInterval(interval);
-// });
-
-// grid.addEventListener('mouseleave', event => {
-//     clearInterval(interval);
-// });
+grid.addEventListener('mouseleave', event => {
+    isHeld = false;
+    clearInterval(interval);
+});
