@@ -1,11 +1,14 @@
 const grid = document.getElementsByClassName("grid")[0];
-const startButton = document.getElementById("start-search");
+const linearButton = document.getElementById("linear-search");
+const bfsButton = document.getElementById("bfs-search");
+const dfsButton = document.getElementById("dfs-search");
 let interval;
 let mouse = {x: 0, y: 0};
 const gridHeight = 20;
 const gridWidth = 20;
 
 let gridArr = [];
+let wall = new Set([]);
 
 for(let i = 0; i < gridHeight; i++) {
     gridArr.push([]);
@@ -15,6 +18,16 @@ for(let i = 0; i < gridHeight; i++) {
         div.setAttribute('id', `${i}-${j}`);
         grid.appendChild(div);
         gridArr[i].push(0);
+    }
+}
+
+for(let i = 0; i < 250; i++) {
+    const row = Math.floor(Math.random() * gridHeight);
+    const col = Math.floor(Math.random() * gridWidth);
+    if (row !== 0 && col !== 0) {
+        const wallNode = document.getElementById(`${row}-${col}`);
+        wallNode.classList.add('wall');
+        gridArr[row][col] = 1;
     }
 }
 
@@ -28,29 +41,27 @@ gridArr[endi][endj] = -1;
 const endNode = document.getElementsByClassName("grid-square")[(endi*gridWidth) + endj];
 endNode.classList.add('end-node');
 
-console.log(gridArr);
 
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function handleGridClick(event) {
-    await pause(1000);
-    if (event.target.className === 'grid-square' || event.target.className === 'grid-square color') {
+    if (event.target.className === 'grid-square' || event.target.className === 'grid-square wall') {
         const coord = event.target.id.split('-');
         const row = Number(coord[0]);
         const col = Number(coord[1]);
-        console.log('row: ', row);
-        console.log('col: ', col);
-        event.target.classList.toggle('color');
+        gridArr[row][col] = gridArr[row][col] === 0 ? 1 : 0;
+        console.log(gridArr[row][col]);
+        event.target.classList.toggle('wall');
     }
 }
 
-async function bfs() {
+async function linear() {
     for(let i = 0; i < gridArr.length; i++) {
         for(let j = 0; j < gridArr[i].length; j++) {
             if (gridArr[i][j] !== 2 && gridArr[i][j] !== -1) {
                 const node = document.getElementById(`${i}-${j}`);
                 node.classList.add("color");
-                await pause(25);
+                await pause(10);
             } else if (gridArr[i][j] === -1) {
                 return;
             }
@@ -58,8 +69,102 @@ async function bfs() {
     }
 }
 
+async function bfs() {
+    let queue = ['0-0'];
+    let visited = new Set(['0-0']);
+
+    while(queue.length > 0) {
+        let coord = queue.pop().split('-');
+        const currRow = Number(coord[0]);
+        const currCol = Number(coord[1]);
+        currNode = gridArr[currRow][currCol];
+        console.log(currNode);
+
+        if (currNode === -1) {
+            console.log('end node');
+            return;
+        } else {
+            if (currNode !== 2) {
+                const htmlNode = document.getElementById(`${currRow}-${currCol}`);
+                htmlNode.classList.add('color');
+            }
+
+            const right = [currRow, currCol+1];
+            const bottom = [currRow+1, currCol];
+            const left = [currRow, currCol-1];
+            const top = [currRow-1, currCol];
+
+            if (right[1] < gridWidth && !visited.has(`${right[0]}-${right[1]}`) && gridArr[right[0]][right[1]] !== 1) {
+                queue.unshift(`${right[0]}-${right[1]}`);
+                visited.add(`${right[0]}-${right[1]}`);
+            }
+            if (bottom[0] < gridHeight && !visited.has(`${bottom[0]}-${bottom[1]}`) && gridArr[bottom[0]][bottom[1]] !== 1) {
+                queue.unshift(`${bottom[0]}-${bottom[1]}`);
+                visited.add(`${bottom[0]}-${bottom[1]}`);
+            }
+            if (left[1] >= 0 && !visited.has(`${left[0]}-${left[1]}`) && gridArr[left[0]][left[1]] !== 1) {
+                queue.unshift(`${left[0]}-${left[1]}`);
+                visited.add(`${left[0]}-${left[1]}`);
+            }
+            if (top[0] >= 0 && !visited.has(`${top[0]}-${top[1]}`) && gridArr[top[0]][top[1]] !== 1) {
+                queue.unshift(`${top[0]}-${top[1]}`);
+                visited.add(`${top[0]}-${top[1]}`);
+            }
+        }
+        await pause(25);
+    }
+}
+
+async function dfs() {
+    let stack = ['0-0'];
+    let visited = new Set(['0-0']);
+
+    while(stack.length > 0) {
+        let coord = stack.pop().split('-');
+        const currRow = Number(coord[0]);
+        const currCol = Number(coord[1]);
+        currNode = gridArr[currRow][currCol];
+        console.log(currNode);
+
+        if (currNode === -1) {
+            console.log('end node');
+            return;
+        } else {
+            if (currNode !== 2) {
+                const htmlNode = document.getElementById(`${currRow}-${currCol}`);
+                htmlNode.classList.add('color');
+            }
+
+            const right = [currRow, currCol+1];
+            const bottom = [currRow+1, currCol];
+            const left = [currRow, currCol-1];
+            const top = [currRow-1, currCol];
+
+            if (bottom[0] < gridHeight && !visited.has(`${bottom[0]}-${bottom[1]}`) && gridArr[bottom[0]][bottom[1]] !== 1) {
+                stack.push(`${bottom[0]}-${bottom[1]}`);
+                visited.add(`${bottom[0]}-${bottom[1]}`);
+            }
+            if (left[1] >= 0 && !visited.has(`${left[0]}-${left[1]}`) && gridArr[left[0]][left[1]] !== 1) {
+                stack.push(`${left[0]}-${left[1]}`);
+                visited.add(`${left[0]}-${left[1]}`);
+            }
+            if (top[0] >= 0 && !visited.has(`${top[0]}-${top[1]}`) && gridArr[top[0]][top[1]] !== 1) {
+                stack.push(`${top[0]}-${top[1]}`);
+                visited.add(`${top[0]}-${top[1]}`);
+            }
+            if (right[1] < gridWidth && !visited.has(`${right[0]}-${right[1]}`) && gridArr[right[0]][right[1]] !== 1) {
+                stack.push(`${right[0]}-${right[1]}`);
+                visited.add(`${right[0]}-${right[1]}`);
+            }
+        }
+        await pause(25);
+    }
+}
+
 grid.addEventListener('click', handleGridClick);
-startButton.addEventListener('click', bfs);
+linearButton.addEventListener('click', linear);
+bfsButton.addEventListener('click', bfs);
+dfsButton.addEventListener('click', dfs);
 
 
 

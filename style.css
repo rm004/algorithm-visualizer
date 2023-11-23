@@ -20,14 +20,18 @@
 
 /* @keyframes example {
     from {background-color: white;}
-    to {background-color: blue;}
+    to {background-color: #fadb6f;}
 } */
 
 .color {
-    background-color: blue;
+    background-color: #fadb6f;
     /* animation-name: example;
-    animation-duration: 1s;
+    animation-duration: 0.4s;
     animation-fill-mode: forwards; */
+}
+
+.wall {
+    background-color: black;
 }
 
 #search-btn-container {
@@ -37,7 +41,7 @@
 }
 
 .start-node {
-    background-color: orange;
+    background-color: green;
 }
 
 .end-node {
