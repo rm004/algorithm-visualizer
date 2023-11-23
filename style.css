@@ -1,0 +1,45 @@
+.grid {
+    width: 80%;
+    background-color: whitesmoke;
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    margin: auto;
+    gap: 1px;
+}
+
+.grid-square {
+    width: 100%;
+    height: 25px;
+    margin: 0;
+    padding: 0;
+}
+
+.grid-square:hover {
+    cursor: pointer;
+}
+
+/* @keyframes example {
+    from {background-color: white;}
+    to {background-color: blue;}
+} */
+
+.color {
+    background-color: blue;
+    /* animation-name: example;
+    animation-duration: 1s;
+    animation-fill-mode: forwards; */
+}
+
+#search-btn-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.start-node {
+    background-color: orange;
+}
+
+.end-node {
+    background-color: red;
+}
